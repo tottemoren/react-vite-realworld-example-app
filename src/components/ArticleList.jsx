@@ -56,13 +56,6 @@ function ArticleList({ filters = initialFilters }) {
   //   isSuccess  … 通信に成功したら true
   const { data, isFetching, isError, isSuccess } = useArticlesQuery({ filters: { ...filters, offset } })
 
-  // 全部で何ページあるかを計算する
-  // Math.ceil … 小数点以下を切り上げる(例: 記事が25件 → 25 / 10 = 2.5 → 3ページ)
-  // ※ この行は下の「通信中なら Loading」のチェックより前にあるので、通信中でも実行される
-  //    データが届く前でも data が undefined にならないよう、useArticlesQuery.js で
-  //    placeholderData(仮のデータ)を設定している。それがないとここでエラーになる
-  const pages = Math.ceil(data.articlesCount / limit)
-
   // 親から「このページを表示して」と指定されたら(filters.offset が null でなければ)、そのページに切り替える
   // useDeepCompareEffect … useEffect とほぼ同じで、[filters] が変わったときに中の処理を実行する
   //   普通の useEffect は、オブジェクトを「中身」ではなく「同じ物かどうか」で比べる
@@ -83,6 +76,12 @@ function ArticleList({ filters = initialFilters }) {
   // 通信には成功したが記事が0件なら「まだ記事がありません」と表示する
   // data?.articles の「?.」は、data が空(null / undefined)でもエラーにしない書き方
   if (isSuccess && isEmpty(data?.articles)) return <p className="article-preview">No articles are here... yet.</p>
+
+  // 全部で何ページあるかを計算する
+  // Math.ceil … 小数点以下を切り上げる(例: 記事が25件 → 25 / 10 = 2.5 → 3ページ)
+  // ※ data を使うので、必ず「読み込み中」「エラー」のチェックより後に置くこと
+  //    （エラー時は data が undefined になり、前に置くとクラッシュして画面が真っ白になる）
+  const pages = Math.ceil(data.articlesCount / limit)
 
   // ここまで来たら「記事が1件以上ある」状態なので、一覧を表示する
   return (
