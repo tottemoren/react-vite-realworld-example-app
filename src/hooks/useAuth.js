@@ -8,7 +8,12 @@ function getAuthUser() {
 
   if (!jwt) return {}
 
-  return JSON.parse(atob(jwt))
+  const authUser = JSON.parse(atob(jwt))
+
+  // ページを再読み込みしても認証ヘッダーが付くようにする
+  axios.defaults.headers.Authorization = `Token ${authUser.token}`
+
+  return authUser
 }
 
 const state = proxyWithComputed(
@@ -32,6 +37,8 @@ const actions = {
     state.authUser = {}
 
     window.localStorage.removeItem('jwtToken')
+
+    delete axios.defaults.headers.Authorization
   },
   checkAuth: () => {
     const authUser = getAuthUser()
