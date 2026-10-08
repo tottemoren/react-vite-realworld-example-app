@@ -59,3 +59,7 @@ function useAuth() {
 }
 
 export default useAuth
+
+// フックはコンポーネントの中でしか使えないため、
+// main.jsx の axios interceptor からログアウトできるように actions を直接公開する
+export { actions as authActions }
